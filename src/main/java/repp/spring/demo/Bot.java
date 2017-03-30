@@ -1,6 +1,9 @@
 package repp.spring.demo;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -8,10 +11,18 @@ import org.telegram.telegrambots.exceptions.TelegramApiException;
 import repp.spring.demo.model.Subscriber;
 import repp.spring.demo.service.SubscriptionService;
 
+
 public class Bot extends TelegramLongPollingBot {
 
+    private Logger log = LoggerFactory.getLogger(Application.class);
+
     @Autowired
-    SubscriptionService subscriptionService;
+    private SubscriptionService subscriptionService;
+
+    @Value("${bot.token}")
+    private String botToken;// = "311584248:AAHDQcrpoDsX2AUt31J5PZhOxAv1Zf3cFMo";
+
+
 
     private enum Command {
         SUBSCRIBE,
@@ -24,8 +35,7 @@ public class Bot extends TelegramLongPollingBot {
 
     @Override
     public String getBotToken() {
-        return "311584248:AAHDQcrpoDsX2AUt31J5PZhOxAv1Zf3cFMo";
-//        return "360154389:AAH3xXsvMbb_AOOqovHl8qDJE5TVCI0ffjA";
+        return botToken;
     }
 
     public void onUpdateReceived(final Update update) {
@@ -48,20 +58,20 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     public void notifySubscribers(String text){
-        for (Subscriber i :
+        for (Subscriber subscriber :
                 subscriptionService.getSubscribers()) {
-            newMessage(i.getId(), text);
+            sendToSubscriber(subscriber.getId(), text);
         }
     }
 
-    private void newMessage(Long id, String text) {
+    private void sendToSubscriber(Long id, String text) {
         SendMessage message = new SendMessage()
             .setText(text)
             .setChatId(id);
         try {
             sendMessage(message);
         } catch (TelegramApiException e) {
-            e.printStackTrace();
+            log.error("Error sending message", e);
         }
     }
 }

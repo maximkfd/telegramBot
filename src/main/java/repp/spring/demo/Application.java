@@ -3,10 +3,8 @@ package repp.spring.demo;
 import org.h2.tools.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.*;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
@@ -23,6 +21,7 @@ import java.util.concurrent.Executors;
 
 @Configuration
 @ComponentScan
+@PropertySource("/telegram.properties")
 public class Application {
 
     private static final Logger log = LoggerFactory.getLogger(Application.class);
@@ -30,8 +29,6 @@ public class Application {
     public static void main(final String[] args) {
         final AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Application.class);
         log.info("App started!");
-        //fuck you
-
 
         IdeaCreationService ideaCreationService = ctx.getBean(IdeaCreationService.class);
         ExecutorService service = Executors.newFixedThreadPool(1);
@@ -46,7 +43,7 @@ public class Application {
         try {
             api.registerBot(bot());
         } catch (TelegramApiRequestException e) {
-            e.printStackTrace();
+            log.error("Failed to init bot", e);
         }
     }
 
@@ -54,6 +51,11 @@ public class Application {
     @Bean
     public Bot bot() {
         return new Bot();
+    }
+
+    @Bean
+    public static PropertySourcesPlaceholderConfigurer propertyConfigInDev() {
+        return new PropertySourcesPlaceholderConfigurer();
     }
 
     @Bean

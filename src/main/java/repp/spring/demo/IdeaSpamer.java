@@ -1,13 +1,17 @@
 package repp.spring.demo;
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import repp.spring.demo.service.IdeaCreationService;
 
 public class IdeaSpamer implements Runnable {
 
+    Logger log = LoggerFactory.getLogger(Application.class);
+
     private IdeaCreationService ideaCreationService;
 
-    public IdeaSpamer(IdeaCreationService ideaCreationService) {
+    IdeaSpamer(IdeaCreationService ideaCreationService) {
         this.ideaCreationService = ideaCreationService;
     }
 
@@ -20,11 +24,9 @@ public class IdeaSpamer implements Runnable {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-            System.out.println("call createIdea, service = " + ideaCreationService.toString());
-            int result = ideaCreationService.createIdea("Just one more brilliant idea (" +
+            ideaCreationService.createIdea("Just one more brilliant idea (" +
                     ideasCount++ +
                     ")");
         }
-        System.out.println("Finished run");
     }
 }
